@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalender Pendidikan Sekolah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0F2A44;
+    --navy-2:#173C61;
+    --gold:#C9A227;
+    --teal:#2E7D6B;
+    --teal-light:#6BB6A8;
+    --bg:#F3F5F8;
+    --card:#FFFFFF;
+    --ink:#1C2733;
+    --muted:#67748A;
+    --line:#E1E6ED;
+
+    --c-efektif:#2E7D6B;
+    --c-ke:#5B8FD1;
+    --c-lu:#C7CDD6;
+    --c-lhb:#C24A4A;
+    --c-cb:#E08A3E;
+    --c-kts:#8D6FC4;
+    --c-mpls:#3E7CB1;
+    --c-kpp:#C9A227;
+    --c-lhr:#D6784F;
+    --c-ls:#98A2B3;
+    --c-fakultatif:#37A08C;
+    --c-custom:#6B6B6B;
+    --c-kegiatan:#A6763F;
+    --c-liburtambahan:#9B4F6B;
+  }
+  *{box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Lexend',sans-serif;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(135deg,var(--navy) 0%, var(--navy-2) 100%);
+    color:#fff;
+    padding:28px 24px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; right:-60px; top:-60px;
+    width:220px; height:220px; border-radius:50%;
+    border:2px solid rgba(201,162,39,0.25);
+  }
+  .hero::before{
+    content:"";
+    position:absolute; right:20px; bottom:-90px;
+    width:180px; height:180px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.08);
+  }
+  .hero-inner{max-width:1180px; margin:0 auto; position:relative; z-index:1;}
+  .eyebrow{
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold); font-weight:700; margin-bottom:10px;
+  }
+  .school-name{
+    font-family:'Lexend',sans-serif;
+    font-size:clamp(24px,4vw,38px);
+    font-weight:800;
+    background:transparent;
+    border:none;
+    border-bottom:2px dashed rgba(255,255,255,0.35);
+    color:#fff;
+    width:100%;
+    max-width:720px;
+    padding:4px 2px 8px;
+    outline:none;
+  }
+  .school-name::placeholder{color:rgba(255,255,255,0.55);}
+  .school-name:focus{border-bottom-color:var(--gold);}
+  .hero-sub{
+    margin-top:10px; font-size:13.5px; color:rgba(255,255,255,0.75); max-width:640px; line-height:1.5;
+  }
+
+  /* stamp stat */
+  .stat-row{
+    display:flex; gap:14px; flex-wrap:wrap; margin-top:22px;
+  }
+  .stat-badge{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:14px;
+    padding:14px 18px;
+    min-width:130px;
+  }
+  .stat-badge .num{font-family:'Lexend',sans-serif; font-size:26px; font-weight:800; line-height:1;}
+  .stat-badge .lbl{font-size:11.5px; color:rgba(255,255,255,0.65); margin-top:6px;}
+  .stat-badge.accent .num{color:var(--gold);}
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    max-width:1180px; margin:-26px auto 0; padding:0 24px 0;
+    position:relative; z-index:2;
+  }
+  .controls-card{
+    background:var(--card); border:1px solid var(--line);
+    border-radius:16px; padding:16px 20px;
+    display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+    box-shadow:0 10px 30px -14px rgba(15,42,68,0.25);
+  }
+  .field-group{display:flex; align-items:center; gap:10px;}
+  .field-label{font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;}
+  .toggle{
+    display:flex; background:var(--bg); border-radius:10px; padding:3px; border:1px solid var(--line);
+  }
+  .toggle button{
+    border:none; background:transparent; padding:8px 14px; font-size:13px; font-weight:600;
+    color:var(--muted); border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;
+    transition:all .15s ease;
+  }
+  .toggle button.active{background:var(--navy); color:#fff;}
+  .btn{
+    border:1px solid var(--line); background:#fff; color:var(--navy);
+    padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer;
+    font-family:'Inter',sans-serif; transition:all .15s ease;
+  }
+  .btn:hover{border-color:var(--navy); background:var(--bg);}
+  .btn.primary{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .btn.primary:hover{background:var(--navy-2);}
+  .spacer{flex:1;}
+  .hint{font-size:12px; color:var(--muted); margin-left:auto;}
+
+  /* ---------- LEGEND ---------- */
+  .legend{
+    max-width:1180px; margin:18px auto 0; padding:0 24px;
+    display:flex; flex-wrap:wrap; gap:10px;
+  }
+  .chip{
+    display:flex; align-items:center; gap:7px;
+    background:#fff; border:1px solid var(--line); border-radius:999px;
+    padding:6px 12px 6px 8px; font-size:12px; font-weight:500; color:var(--ink);
+  }
+  .dot{width:11px; height:11px; border-radius:4px; flex-shrink:0;}
+
+  /* ---------- MONTHS GRID ---------- */
+  .months{
+    max-width:1180px; margin:22px auto 60px; padding:0 24px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
+  }
+  @media (max-width:920px){ .months{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:620px){ .months{grid-template-columns:1fr;} .controls-card{flex-direction:column; align-items:stretch;} .hint{margin-left:0;} }
+
+  .month-card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:16px 16px 14px; box-shadow:0 6px 18px -12px rgba(15,42,68,0.18);
+  }
+  .month-head{
+    display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px;
+  }
+  .month-title{font-family:'Lexend',sans-serif; font-weight:700; font-size:15.5px; color:var(--navy);}
+  .month-count{font-size:11px; color:var(--muted); font-weight:600;}
+
+  .dow-row{display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:4px;}
+  .dow{text-align:center; font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.03em;}
+
+  .day-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
+
+  .month-notes{
+    margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);
+  }
+  .month-notes-title{
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--muted); margin-bottom:6px;
+  }
+  .month-notes ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px;}
+  .month-notes li{
+    font-size:11.5px; line-height:1.4; color:var(--ink); display:flex; gap:6px; align-items:flex-start;
+  }
+  .month-notes li .ndot{
+    width:8px; height:8px; border-radius:3px; flex-shrink:0; margin-top:3px;
+  }
+  .month-notes li b{font-weight:700; color:var(--navy); white-space:nowrap;}
+  .day-cell{
+    position:relative; aspect-ratio:1/1; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:600; cursor:pointer; color:#fff;
+    user-select:none; transition:transform .1s ease;
+  }
+  .day-cell:hover{transform:scale(1.12); z-index:3;}
+  .day-cell.blank{visibility:hidden; cursor:default;}
+  .day-cell.outside{
+    background:transparent !important; color:var(--line) !important;
+    cursor:default; box-shadow:none;
+  }
+  .day-cell.outside:hover{transform:none;}
+  .day-cell.overridden::after{
+    content:""; position:absolute; top:2px; right:2px;
+    width:5px; height:5px; border-radius:50%; background:#fff;
+    box-shadow:0 0 0 1px rgba(0,0,0,0.25);
+  }
+
+  .type-efektif{background:var(--c-efektif);}
+  .type-ke{background:var(--c-ke);}
+  .type-lu{background:var(--c-lu); color:#8891a0;}
+  .type-lhb{background:var(--c-lhb);}
+  .type-cb{background:var(--c-cb);}
+  .type-kts{background:var(--c-kts);}
+  .type-mpls{background:var(--c-mpls);}
+  .type-kpp{background:var(--c-kpp);}
+  .type-lhr{background:var(--c-lhr);}
+  .type-ls{background:var(--c-ls);}
+  .type-fakultatif{background:var(--c-fakultatif);}
+  .type-custom{background:var(--c-custom);}
+  .type-kegiatan{background:var(--c-kegiatan);}
+  .type-liburtambahan{background:var(--c-liburtambahan);}
+
+  .day-cell.has-event::before{
+    content:""; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+    width:4px; height:4px; border-radius:50%; background:#fff;
+  }
+
+  .tooltip{
+    position:fixed; background:var(--navy); color:#fff; padding:8px 12px;
+    border-radius:8px; font-size:12px; pointer-events:none; z-index:50;
+    box-shadow:0 8px 20px -8px rgba(0,0,0,0.4); max-width:220px; line-height:1.4;
+    opacity:0; transition:opacity .1s ease;
+  }
+  .tooltip.show{opacity:1;}
+  .tooltip b{color:var(--gold);}
+
+  footer{
+    max-width:1180px; margin:0 auto 40px; padding:0 24px;
+    font-size:11.5px; color:var(--muted); line-height:1.6;
+  }
+  footer .sk{font-weight:600; color:var(--ink);}
+
+  @media print{
+    .controls, .hint, .btn{display:none !important;}
+    body{background:#fff;}
+    .hero{background:var(--navy) !important;}
+    .months{grid-template-columns:repeat(3,1fr);}
+    .month-card{box-shadow:none; break-inside:avoid; border:1px solid #cfd6e0;}
+    .day-cell:hover{transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Kalender Pendidikan &middot; Tahun Ajaran 2026 / 2027</div>
+    <input id="schoolName" class="school-name" placeholder="Ketik nama sekolah di sini..." />
+    <div class="hero-sub">Disusun mengacu pada SK Kepala Dinas Pendidikan Provinsi Jawa Timur Nomor 400.3/2876/101.1/2026. Klik pada tanggal untuk mengubah status hari (Efektif &rarr; Fakultatif &rarr; Libur Khusus &rarr; Kembali ke default).</div>
+    <div class="stat-row" id="statRow"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="controls-card">
+    <div class="field-group">
+      <span class="field-label">Hari Belajar</span>
+      <div class="toggle" id="modeToggle">
+        <button data-mode="5">5 Hari</button>
+        <button data-mode="6">6 Hari</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <button class="btn" id="resetBtn">Reset ke Default</button>
+      <button class="btn primary" id="printBtn">Cetak / Simpan PDF</button>
+    </div>
+    <div class="hint" id="saveHint">Perubahan tersimpan otomatis di perangkat ini.</div>
+  </div>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<div class="controls" style="margin-top:18px;">
+  <div class="controls-card" style="flex-direction:column; align-items:stretch; gap:14px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div class="field-label" style="font-size:13px;">Tambah Hari Libur Nasional / Kegiatan Sekolah</div>
+      <div class="hint" style="margin:0;">Satu tanggal menampung satu catatan. Menambah ulang akan menimpa catatan sebelumnya.</div>
+    </div>
+    <form id="eventForm" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+      <div class="field-group" style="flex-direction:column; align-items:flex-start; gap:4px;">
+        <span class="field-label" style="font-size:10.5px;">Tanggal</span>
+        <input type="date" id="eventDate" required min="2026-07-13" max="2027-07-10"
+          style="padding:9px 10px; border:1px solid var(--line); border-radius:10px; font-family:'Inter',sans-serif; font-size:13px;">
+      </div>
+      <div class="field-group" style="flex-direction:column; align-items:flex-start; gap:4px; flex:1; min-width:200px;">
+        <span class="field-label" style="font-size:10.5px;">Nama Kegiatan / Libur</span>
+        <input type="text" id="eventName" required placeholder="mis. Libur Hari Jadi Kabupaten / Ujian Praktik"
+          style="width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:10px; font-family:'Inter',sans-serif; font-size:13px;">
+      </div>
+      <div class="field-group" style="flex-direction:column; align-items:flex-start; gap:4px;">
+        <span class="field-label" style="font-size:10.5px;">Kategori</span>
+        <select id="eventCategory" style="padding:9px 10px; border:1px solid var(--line); border-radius:10px; font-family:'Inter',sans-serif; font-size:13px;">
+          <option value="libur">Libur (Nasional/Daerah/Khusus)</option>
+          <option value="kegiatan">Kegiatan Sekolah (tetap masuk)</option>
+        </select>
+      </div>
+      <button type="submit" class="btn primary">Tambahkan</button>
+    </form>
+    <div id="eventList" style="display:flex; flex-direction:column; gap:6px;"></div>
+  </div>
+</div>
+
+<div class="months" id="months"></div>
+
+<footer>
+  <div class="sk">SK Kadindik Jatim No. 400.3/2876/101.1/2026 &mdash; Kalender Pendidikan Provinsi Jawa Timur TA 2026/2027</div>
+  <div>Awal tahun ajaran: Senin, 13 Juli 2026. Akhir tahun ajaran: Jumat, 18 Juni 2027 (5 hari) / Sabtu, 19 Juni 2027 (6 hari). Titik dekat kanan-atas tanggal menandakan status telah diubah manual dari default.</div>
+</footer>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function(){
+  const pad = n => String(n).padStart(2,'0');
+  const dateKey = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
+  const daysInMonth = (y,m) => new Date(y,m+1,0).getDate();
+
+  const RANGE_START = {y:2026,m:6,d:13};
+  const RANGE_END   = {y:2027,m:6,d:10};
+
+  function toSet(arr){ return new Set(arr); }
+
+  const LHB = toSet([
+    '2026-08-17','2026-08-25','2026-12-25',
+    '2027-01-01','2027-01-05','2027-02-06',
+    '2027-03-09','2027-03-10','2027-03-11','2027-03-26','2027-03-28',
+    '2027-05-01','2027-05-06','2027-05-17','2027-05-20',
+    '2027-06-01','2027-06-06'
+  ]);
+  const LHB_LABEL = {
+    '2026-08-17':'HUT Kemerdekaan RI','2026-08-25':'Maulid Nabi Muhammad SAW','2026-12-25':'Hari Raya Natal',
+    '2027-01-01':'Tahun Baru Masehi','2027-01-05':"Isra Mi'raj Nabi Muhammad SAW",'2027-02-06':'Tahun Baru Imlek',
+    '2027-03-09':'Hari Raya Nyepi','2027-03-10':'Hari Raya Idul Fitri','2027-03-11':'Hari Raya Idul Fitri',
+    '2027-03-26':'Wafat Isa Almasih','2027-03-28':'Hari Paskah','2027-05-01':'Hari Buruh Internasional',
+    '2027-05-06':'Kenaikan Isa Almasih','2027-05-17':'Hari Raya Idul Adha','2027-05-20':'Hari Raya Waisak',
+    '2027-06-01':'Hari Lahir Pancasila','2027-06-06':'Tahun Baru Hijriyah'
+  };
+  const CB = toSet(['2026-12-24']);
+  const KTS = toSet(['2026-10-01','2026-10-02','2026-10-03']);
+  const MPLS = toSet(['2026-07-13','2026-07-14','2026-07-15']);
+  const KPP = toSet(['2027-02-08','2027-02-09','2027-02-10']);
+  const LHR = toSet(['2027-03-08','2027-03-12','2027-03-13','2027-03-15','2027-03-16','2027-03-17']);
+  const LS1 = toSet(['2026-12-26','2026-12-28','2026-12-29','2026-12-30','2026-12-31','2027-01-02']);
+  const LS2 = toSet([
+    '2027-06-21','2027-06-22','2027-06-23','2027-06-24','2027-06-25','2027-06-26',
+    '2027-06-28','2027-06-29','2027-06-30',
+    '2027-07-01','2027-07-02','2027-07-03','2027-07-05','2027-07-06','2027-07-07','2027-07-08','2027-07-09','2027-07-10'
+  ]);
+
+  const TYPE_META = {
+    efektif:     {label:'Hari Efektif', cls:'type-efektif'},
+    ke:          {label:'Ekstrakurikuler (Sabtu)', cls:'type-ke'},
+    lu:          {label:'Libur Umum (Minggu)', cls:'type-lu'},
+    lhb:         {label:'Libur Hari Besar', cls:'type-lhb'},
+    cb:          {label:'Cuti Bersama', cls:'type-cb'},
+    kts:         {label:'Kegiatan Tengah Semester', cls:'type-kts'},
+    mpls:        {label:'MPLS (Pengenalan Lingkungan Sekolah)', cls:'type-mpls'},
+    kpp:         {label:'Kegiatan Permulaan Puasa', cls:'type-kpp'},
+    lhr:         {label:'Libur Sekitar Hari Raya', cls:'type-lhr'},
+    ls:          {label:'Libur Semester', cls:'type-ls'},
+    fakultatif:  {label:'Hari Efektif Fakultatif', cls:'type-fakultatif'},
+    custom:      {label:'Libur Khusus (ditetapkan sekolah)', cls:'type-custom'},
+    kegiatan:    {label:'Kegiatan Sekolah', cls:'type-kegiatan'},
+    liburtambahan:{label:'Libur Tambahan / Nasional Lainnya', cls:'type-liburtambahan'}
+  };
+  const CYCLE = [null,'efektif','fakultatif','custom'];
+
+  const MONTHS = [
+    {y:2026,m:6},{y:2026,m:7},{y:2026,m:8},{y:2026,m:9},{y:2026,m:10},{y:2026,m:11},
+    {y:2027,m:0},{y:2027,m:1},{y:2027,m:2},{y:2027,m:3},{y:2027,m:4},{y:2027,m:5},{y:2027,m:6}
+  ];
+  const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const DOW_LABELS = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+
+  function inRange(y,m,d){
+    const t = new Date(y,m,d).getTime();
+    const s = new Date(RANGE_START.y,RANGE_START.m,RANGE_START.d).getTime();
+    const e = new Date(RANGE_END.y,RANGE_END.m,RANGE_END.d).getTime();
+    return t>=s && t<=e;
+  }
+
+  function defaultType(y,m,d,mode){
+    const key = dateKey(y,m,d);
+    if(CB.has(key)) return 'cb';
+    if(LHB.has(key)) return 'lhb';
+    if(LHR.has(key)) return 'lhr';
+    if(KPP.has(key)) return 'kpp';
+    if(KTS.has(key)) return 'kts';
+    if(MPLS.has(key)) return 'mpls';
+    if(LS1.has(key) || LS2.has(key)) return 'ls';
+    const dow = new Date(y,m,d).getDay(); // 0 Sun .. 6 Sat
+    if(dow===0) return 'lu';
+    if(dow===6 && mode==='5') return 'ke';
+    return 'efektif';
+  }
+
+  // ---------- state ----------
+  let state = { schoolName:'', mode:'6', overrides:{}, events:{} };
+
+  async function loadState(){
+    try{
+      const r = await window.storage.get('kalender-sekolah-config', false);
+      if(r && r.value){
+        const parsed = JSON.parse(r.value);
+        state = Object.assign(state, parsed);
+      }
+    }catch(e){ /* no saved config yet */ }
+  }
+  let saveTimer=null;
+  function saveState(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async ()=>{
+      try{ await window.storage.set('kalender-sekolah-config', JSON.stringify(state), false); }
+      catch(e){ console.error('gagal menyimpan', e); }
+    }, 250);
+  }
+
+  function effectiveType(y,m,d){
+    const key = dateKey(y,m,d);
+    if(state.events[key]) return state.events[key].category==='libur' ? 'liburtambahan' : 'kegiatan';
+    if(state.overrides[key]) return state.overrides[key];
+    return defaultType(y,m,d,state.mode);
+  }
+
+  // ---------- rendering ----------
+  const monthsEl = document.getElementById('months');
+  const legendEl = document.getElementById('legend');
+  const statRowEl = document.getElementById('statRow');
+  const tooltip = document.getElementById('tooltip');
+  const schoolNameInput = document.getElementById('schoolName');
+
+  function renderLegend(){
+    legendEl.innerHTML='';
+    Object.entries(TYPE_META).forEach(([key,meta])=>{
+      const chip = document.createElement('div');
+      chip.className='chip';
+      chip.innerHTML = `<span class="dot" style="background:var(--c-${key})"></span>${meta.label}`;
+      legendEl.appendChild(chip);
+    });
+  }
+
+  function renderMonths(){
+    monthsEl.innerHTML='';
+    MONTHS.forEach(({y,m})=>{
+      const card = document.createElement('div');
+      card.className='month-card';
+
+      const head = document.createElement('div');
+      head.className='month-head';
+      const dim = daysInMonth(y,m);
+      let efektifCount=0;
+      for(let d=1; d<=dim; d++){
+        if(!inRange(y,m,d)) continue;
+        const t = effectiveType(y,m,d);
+        if(t==='efektif'||t==='ke'||t==='fakultatif'||t==='kegiatan') efektifCount++;
+      }
+      head.innerHTML = `<span class="month-title">${MONTH_NAMES[m]} ${y}</span><span class="month-count">${efektifCount} hari efektif</span>`;
+      card.appendChild(head);
+
+      const dowRow = document.createElement('div');
+      dowRow.className='dow-row';
+      DOW_LABELS.forEach(l=>{
+        const el = document.createElement('div');
+        el.className='dow'; el.textContent=l;
+        dowRow.appendChild(el);
+      });
+      card.appendChild(dowRow);
+
+      const grid = document.createElement('div');
+      grid.className='day-grid';
+
+      const firstDow = new Date(y,m,1).getDay(); // 0 Sun..6 Sat
+      const leading = (firstDow===0) ? 6 : firstDow-1; // convert to Mon-first
+      for(let i=0;i<leading;i++){
+        const b = document.createElement('div');
+        b.className='day-cell blank';
+        grid.appendChild(b);
+      }
+      for(let d=1; d<=dim; d++){
+        const cell = document.createElement('div');
+        if(!inRange(y,m,d)){
+          cell.className='day-cell outside';
+          cell.textContent=d;
+          grid.appendChild(cell);
+          continue;
+        }
+        const key = dateKey(y,m,d);
+        const type = effectiveType(y,m,d);
+        const meta = TYPE_META[type];
+        cell.className = 'day-cell '+meta.cls;
+        if(state.overrides[key]) cell.classList.add('overridden');
+        if(state.events[key]) cell.classList.add('has-event');
+        cell.textContent = d;
+        cell.dataset.key = key;
+        cell.dataset.y=y; cell.dataset.m=m; cell.dataset.d=d;
+
+        cell.addEventListener('click', ()=> onDayClick(y,m,d));
+        cell.addEventListener('mousemove', (e)=> showTooltip(e, y,m,d,type,key));
+        cell.addEventListener('mouseleave', hideTooltip);
+        grid.appendChild(cell);
+      }
+      card.appendChild(grid);
+      card.appendChild(buildMonthNotes(y,m));
+      monthsEl.appendChild(card);
+    });
+  }
+
+  const NOTE_TYPES = new Set(['lhb','cb','kts','mpls','kpp','lhr','ls','kegiatan','liburtambahan','fakultatif','custom']);
+
+  function noteLabelFor(y,m,d,type,key){
+    if(type==='lhb') return LHB_LABEL[key] || TYPE_META.lhb.label;
+    if(type==='kegiatan' || type==='liburtambahan') return state.events[key] ? state.events[key].name : TYPE_META[type].label;
+    return TYPE_META[type].label;
+  }
+
+  function buildMonthNotes(y,m){
+    const wrap = document.createElement('div');
+    wrap.className='month-notes';
+    const dim = daysInMonth(y,m);
+    const raw = [];
+    for(let d=1; d<=dim; d++){
+      if(!inRange(y,m,d)) continue;
+      const type = effectiveType(y,m,d);
+      if(!NOTE_TYPES.has(type)) continue;
+      const key = dateKey(y,m,d);
+      raw.push({ d, type, label: noteLabelFor(y,m,d,type,key) });
+    }
+    if(raw.length===0){
+      wrap.innerHTML = `<div class="month-notes-title">Keterangan</div><div style="font-size:11.5px; color:var(--muted);">Tidak ada kegiatan khusus bulan ini.</div>`;
+      return wrap;
+    }
+    // group consecutive days that share the same label into a range
+    const groups = [];
+    raw.forEach(item=>{
+      const last = groups[groups.length-1];
+      if(last && last.label===item.label && item.d===last.end+1){
+        last.end = item.d;
+      } else {
+        groups.push({start:item.d, end:item.d, label:item.label, type:item.type});
+      }
+    });
+    const items = groups.map(g=>{
+      const range = g.start===g.end ? `${g.start}` : `${g.start}&ndash;${g.end}`;
+      const color = `var(--c-${g.type})`;
+      return `<li><span class="ndot" style="background:${color}"></span><b>${range}</b> ${g.label}</li>`;
+    }).join('');
+    wrap.innerHTML = `<div class="month-notes-title">Keterangan</div><ul>${items}</ul>`;
+    return wrap;
+  }
+
+  function showTooltip(e,y,m,d,type,key){
+    const meta = TYPE_META[type];
+    const dateStr = `${d} ${MONTH_NAMES[m]} ${y}`;
+    let extra = LHB_LABEL[key] ? `<br><b>${LHB_LABEL[key]}</b>` : '';
+    if(state.events[key]) extra += `<br><b>${state.events[key].name}</b>`;
+    let overrideNote;
+    if(state.events[key]) overrideNote = '<br><span style="color:#C9A227">Catatan manual — klik untuk hapus</span>';
+    else overrideNote = state.overrides[key] ? '<br><span style="color:#C9A227">Diubah manual — klik untuk lanjut siklus</span>' : '<br><span style="opacity:.7">Klik untuk ubah status</span>';
+    tooltip.innerHTML = `${dateStr}<br>${meta.label}${extra}${overrideNote}`;
+    tooltip.style.left = (e.clientX+14)+'px';
+    tooltip.style.top = (e.clientY+14)+'px';
+    tooltip.classList.add('show');
+  }
+  function hideTooltip(){ tooltip.classList.remove('show'); }
+
+  function onDayClick(y,m,d){
+    const key = dateKey(y,m,d);
+    if(state.events[key]){
+      if(confirm(`Hapus catatan "${state.events[key].name}" pada tanggal ini?`)){
+        delete state.events[key];
+        saveState();
+        renderAll();
+      }
+      return;
+    }
+    const current = state.overrides[key] || null;
+    const idx = CYCLE.indexOf(current);
+    const next = CYCLE[(idx+1) % CYCLE.length];
+    if(next===null){ delete state.overrides[key]; }
+    else { state.overrides[key] = next; }
+    saveState();
+    renderAll();
+  }
+
+  function renderStats(){
+    let efektif=0, fakultatif=0, libur=0, ke=0, kegiatan=0;
+    for(let y=RANGE_START.y; y<=RANGE_END.y; y++){
+      for(let m=0;m<12;m++){
+        const dim = daysInMonth(y,m);
+        for(let d=1; d<=dim; d++){
+          if(!inRange(y,m,d)) continue;
+          const t = effectiveType(y,m,d);
+          if(t==='efektif') efektif++;
+          else if(t==='fakultatif') fakultatif++;
+          else if(t==='ke') ke++;
+          else if(t==='kegiatan') kegiatan++;
+          else libur++;
+        }
+      }
+    }
+    const stats = [
+      {n:efektif, l:'Hari Efektif', accent:true},
+      {n:fakultatif+kegiatan, l:'Efektif Fakultatif & Kegiatan'},
+      {n:ke, l:'Ekstrakurikuler (Sabtu)'},
+      {n:libur, l:'Hari Libur'}
+    ];
+    statRowEl.innerHTML = stats.map(s=>`
+      <div class="stat-badge ${s.accent?'accent':''}">
+        <div class="num">${s.n}</div>
+        <div class="lbl">${s.l}</div>
+      </div>`).join('');
+  }
+
+  function renderEventList(){
+    const wrap = document.getElementById('eventList');
+    const entries = Object.entries(state.events).sort((a,b)=> a[0]<b[0]?-1:1);
+    if(entries.length===0){
+      wrap.innerHTML = '<div style="font-size:12px; color:var(--muted);">Belum ada kegiatan atau libur tambahan yang ditambahkan.</div>';
+      return;
+    }
+    wrap.innerHTML = entries.map(([key,ev])=>{
+      const [y,m,d] = key.split('-').map(Number);
+      const dateStr = `${d} ${MONTH_NAMES[m-1]} ${y}`;
+      const swatch = ev.category==='libur' ? 'var(--c-liburtambahan)' : 'var(--c-kegiatan)';
+      const catLabel = ev.category==='libur' ? 'Libur' : 'Kegiatan';
+      return `<div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:var(--bg); border-radius:10px; font-size:12.5px;">
+        <span class="dot" style="background:${swatch}"></span>
+        <span style="font-weight:600; min-width:110px;">${dateStr}</span>
+        <span style="flex:1; color:var(--ink);">${ev.name}</span>
+        <span style="font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;">${catLabel}</span>
+        <button data-key="${key}" class="delEventBtn" style="border:none; background:transparent; color:#C24A4A; font-weight:700; cursor:pointer; font-size:14px; padding:2px 6px;">&times;</button>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('.delEventBtn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        delete state.events[btn.dataset.key];
+        saveState();
+        renderAll();
+      });
+    });
+  }
+
+  function renderAll(){
+    renderMonths();
+    renderStats();
+    renderEventList();
+  }
+
+  // ---------- controls ----------
+  document.getElementById('modeToggle').addEventListener('click',(e)=>{
+    const btn = e.target.closest('button[data-mode]');
+    if(!btn) return;
+    state.mode = btn.dataset.mode;
+    saveState();
+    syncModeButtons();
+    renderAll();
+  });
+  function syncModeButtons(){
+    document.querySelectorAll('#modeToggle button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.mode===state.mode);
+    });
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    if(confirm('Kembalikan semua tanggal ke status default sesuai SK Kalender Pendidikan? Perubahan manual akan hilang.')){
+      state.overrides = {};
+      saveState();
+      renderAll();
+    }
+  });
+
+  document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
+  document.getElementById('eventForm').addEventListener('submit',(e)=>{
+    e.preventDefault();
+    const dateVal = document.getElementById('eventDate').value;
+    const name = document.getElementById('eventName').value.trim();
+    const category = document.getElementById('eventCategory').value;
+    if(!dateVal || !name) return;
+    state.events[dateVal] = { name, category };
+    delete state.overrides[dateVal];
+    saveState();
+    document.getElementById('eventName').value='';
+    renderAll();
+  });
+
+  schoolNameInput.addEventListener('input', ()=>{
+    state.schoolName = schoolNameInput.value;
+    saveState();
+  });
+
+  // ---------- init ----------
+  (async function init(){
+    await loadState();
+    schoolNameInput.value = state.schoolName || '';
+    syncModeButtons();
+    renderLegend();
+    renderAll();
+  })();
+})();
+</script>
+</body>
+</html>
