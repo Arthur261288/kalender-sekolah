@@ -271,6 +271,14 @@
       </div>
     </div>
     <div class="field-group">
+      <span class="field-label">Statistik</span>
+      <div class="toggle" id="semesterToggle">
+        <button data-sem="all">Tahun Penuh</button>
+        <button data-sem="1">Semester 1</button>
+        <button data-sem="2">Semester 2</button>
+      </div>
+    </div>
+    <div class="field-group">
       <button class="btn" id="resetBtn">Reset ke Default</button>
       <button class="btn primary" id="printBtn">Cetak / Simpan PDF</button>
     </div>
@@ -327,6 +335,13 @@
 
   const RANGE_START = {y:2026,m:6,d:13};
   const RANGE_END   = {y:2027,m:6,d:10};
+  const SEMESTER_SPLIT_TS = new Date(2027,0,4).getTime(); // Semester 2 dimulai 4 Januari 2027
+
+  function inSemester(y,m,d,sem){
+    if(sem==='all') return true;
+    const t = new Date(y,m,d).getTime();
+    return sem==='1' ? t < SEMESTER_SPLIT_TS : t >= SEMESTER_SPLIT_TS;
+  }
 
   function toSet(arr){ return new Set(arr); }
 
@@ -405,7 +420,7 @@
   }
 
   // ---------- state ----------
-  let state = { schoolName:'', mode:'6', overrides:{}, events:{} };
+  let state = { schoolName:'', mode:'6', overrides:{}, events:{}, statSemester:'all' };
 
   async function loadState(){
     try{
@@ -594,11 +609,13 @@
 
   function renderStats(){
     let efektif=0, fakultatif=0, libur=0, ke=0, kegiatan=0;
+    const sem = state.statSemester;
     for(let y=RANGE_START.y; y<=RANGE_END.y; y++){
       for(let m=0;m<12;m++){
         const dim = daysInMonth(y,m);
         for(let d=1; d<=dim; d++){
           if(!inRange(y,m,d)) continue;
+          if(!inSemester(y,m,d,sem)) continue;
           const t = effectiveType(y,m,d);
           if(t==='efektif') efektif++;
           else if(t==='fakultatif') fakultatif++;
@@ -608,11 +625,12 @@
         }
       }
     }
+    const semLabel = sem==='all' ? ' (Tahun Penuh)' : sem==='1' ? ' (Semester 1)' : ' (Semester 2)';
     const stats = [
-      {n:efektif, l:'Hari Efektif', accent:true},
-      {n:fakultatif+kegiatan, l:'Efektif Fakultatif & Kegiatan'},
-      {n:ke, l:'Ekstrakurikuler (Sabtu)'},
-      {n:libur, l:'Hari Libur'}
+      {n:efektif, l:'Hari Efektif'+semLabel, accent:true},
+      {n:fakultatif+kegiatan, l:'Efektif Fakultatif & Kegiatan'+semLabel},
+      {n:ke, l:'Ekstrakurikuler (Sabtu)'+semLabel},
+      {n:libur, l:'Hari Libur'+semLabel}
     ];
     statRowEl.innerHTML = stats.map(s=>`
       <div class="stat-badge ${s.accent?'accent':''}">
@@ -671,6 +689,20 @@
     });
   }
 
+  document.getElementById('semesterToggle').addEventListener('click',(e)=>{
+    const btn = e.target.closest('button[data-sem]');
+    if(!btn) return;
+    state.statSemester = btn.dataset.sem;
+    saveState();
+    syncSemesterButtons();
+    renderStats();
+  });
+  function syncSemesterButtons(){
+    document.querySelectorAll('#semesterToggle button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.sem===state.statSemester);
+    });
+  }
+
   document.getElementById('resetBtn').addEventListener('click', ()=>{
     if(confirm('Kembalikan semua tanggal ke status default sesuai SK Kalender Pendidikan? Perubahan manual akan hilang.')){
       state.overrides = {};
@@ -704,6 +736,7 @@
     await loadState();
     schoolNameInput.value = state.schoolName || '';
     syncModeButtons();
+    syncSemesterButtons();
     renderLegend();
     renderAll();
   })();
