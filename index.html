@@ -348,17 +348,25 @@
   const LHB = toSet([
     '2026-08-17','2026-08-25','2026-12-25',
     '2027-01-01','2027-01-05','2027-02-06',
-    '2027-03-09','2027-03-10','2027-03-11','2027-03-26','2027-03-28',
+    '2027-03-09','2027-03-10','2027-03-11','2027-03-26',
     '2027-05-01','2027-05-06','2027-05-17','2027-05-20',
-    '2027-06-01','2027-06-06'
+    '2027-06-01','2027-06-06','2027-06-16'
   ]);
   const LHB_LABEL = {
     '2026-08-17':'HUT Kemerdekaan RI','2026-08-25':'Maulid Nabi Muhammad SAW','2026-12-25':'Hari Raya Natal',
     '2027-01-01':'Tahun Baru Masehi','2027-01-05':"Isra Mi'raj Nabi Muhammad SAW",'2027-02-06':'Tahun Baru Imlek',
     '2027-03-09':'Hari Raya Nyepi','2027-03-10':'Hari Raya Idul Fitri','2027-03-11':'Hari Raya Idul Fitri',
-    '2027-03-26':'Wafat Isa Almasih','2027-03-28':'Hari Paskah','2027-05-01':'Hari Buruh Internasional',
+    '2027-03-26':'Wafat Isa Almasih','2027-05-01':'Hari Buruh Internasional',
     '2027-05-06':'Kenaikan Isa Almasih','2027-05-17':'Hari Raya Idul Adha','2027-05-20':'Hari Raya Waisak',
-    '2027-06-01':'Hari Lahir Pancasila','2027-06-06':'Tahun Baru Hijriyah'
+    '2027-06-01':'Hari Lahir Pancasila','2027-06-06':'Tahun Baru Hijriyah','2027-06-16':'Libur Hari Besar (sesuai Kalender Pendidikan)'
+  };
+  // Catatan yang tidak mengubah warna/status hari, hanya menampilkan info tambahan
+  // (mengikuti kalender resmi: MPLS tetap dihitung hari efektif biasa, Paskah 28 Maret 2027 jatuh pada hari Minggu/LU)
+  const EXTRA_ANNOTATIONS = {
+    '2026-07-13':'Masa Pengenalan Lingkungan Sekolah (MPLS)',
+    '2026-07-14':'Masa Pengenalan Lingkungan Sekolah (MPLS)',
+    '2026-07-15':'Masa Pengenalan Lingkungan Sekolah (MPLS)',
+    '2027-03-28':'Hari Paskah (bertepatan hari Minggu)'
   };
   const CB = toSet(['2026-12-24']);
   const KTS = toSet(['2026-10-01','2026-10-02','2026-10-03']);
@@ -379,7 +387,6 @@
     lhb:         {label:'Libur Hari Besar', cls:'type-lhb'},
     cb:          {label:'Cuti Bersama', cls:'type-cb'},
     kts:         {label:'Kegiatan Tengah Semester', cls:'type-kts'},
-    mpls:        {label:'MPLS (Pengenalan Lingkungan Sekolah)', cls:'type-mpls'},
     kpp:         {label:'Kegiatan Permulaan Puasa', cls:'type-kpp'},
     lhr:         {label:'Libur Sekitar Hari Raya', cls:'type-lhr'},
     ls:          {label:'Libur Semester', cls:'type-ls'},
@@ -411,7 +418,6 @@
     if(LHR.has(key)) return 'lhr';
     if(KPP.has(key)) return 'kpp';
     if(KTS.has(key)) return 'kts';
-    if(MPLS.has(key)) return 'mpls';
     if(LS1.has(key) || LS2.has(key)) return 'ls';
     const dow = new Date(y,m,d).getDay(); // 0 Sun .. 6 Sat
     if(dow===0) return 'lu';
@@ -530,7 +536,7 @@
     });
   }
 
-  const NOTE_TYPES = new Set(['lhb','cb','kts','mpls','kpp','lhr','ls','kegiatan','liburtambahan','fakultatif','custom']);
+  const NOTE_TYPES = new Set(['lhb','cb','kts','kpp','lhr','ls','kegiatan','liburtambahan','fakultatif','custom']);
 
   function noteLabelFor(y,m,d,type,key){
     if(type==='lhb') return LHB_LABEL[key] || TYPE_META.lhb.label;
@@ -546,9 +552,12 @@
     for(let d=1; d<=dim; d++){
       if(!inRange(y,m,d)) continue;
       const type = effectiveType(y,m,d);
-      if(!NOTE_TYPES.has(type)) continue;
       const key = dateKey(y,m,d);
-      raw.push({ d, type, label: noteLabelFor(y,m,d,type,key) });
+      if(NOTE_TYPES.has(type)){
+        raw.push({ d, type, label: noteLabelFor(y,m,d,type,key) });
+      } else if(EXTRA_ANNOTATIONS[key]){
+        raw.push({ d, type, label: EXTRA_ANNOTATIONS[key] });
+      }
     }
     if(raw.length===0){
       wrap.innerHTML = `<div class="month-notes-title">Keterangan</div><div style="font-size:11.5px; color:var(--muted);">Tidak ada kegiatan khusus bulan ini.</div>`;
@@ -577,6 +586,7 @@
     const meta = TYPE_META[type];
     const dateStr = `${d} ${MONTH_NAMES[m]} ${y}`;
     let extra = LHB_LABEL[key] ? `<br><b>${LHB_LABEL[key]}</b>` : '';
+    if(EXTRA_ANNOTATIONS[key]) extra += `<br><b>${EXTRA_ANNOTATIONS[key]}</b>`;
     if(state.events[key]) extra += `<br><b>${state.events[key].name}</b>`;
     let overrideNote;
     if(state.events[key]) overrideNote = '<br><span style="color:#C9A227">Catatan manual — klik untuk hapus</span>';
